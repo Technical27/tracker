@@ -1,0 +1,23 @@
+---
+main: io.github.technical27.tracker.App
+name: Tracker
+description: "allows multiple people to track a target"
+author: Technical27
+version: 0.1.0
+api-version: 1.16
+commands:
+  compass:
+    description: "gives the player a tracking compass"
+    useage: "/<command>"
+    permission: tracker.track
+  track:
+    description: "sets the tracked player"
+    useage: "/<command> <player>"
+    permission: tracker.setplayer
+permissions:
+  tracker.track:
+    description: "allows you to track the target"
+    default: true
+  tracker.setplayer:
+    description: "allows you to set the target player"
+    default: op
