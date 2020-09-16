@@ -93,10 +93,6 @@ class AppListener(val plugin: App) : Listener {
 class UpdateTask(val plugin: App, val trackedPlayer: Player) : BukkitRunnable() {
   val lastLocations: HashMap<Environment, Location> = HashMap()
 
-  fun findCompass(inv: Inventory): ItemStack? {
-    return inv.contents.find { plugin.isCompass(it) }
-  }
-
   override fun run() {
     val loc = trackedPlayer.location
     val dim = trackedPlayer.world.environment
