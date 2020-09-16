@@ -3,6 +3,7 @@ main: io.github.technical27.tracker.App
 name: Tracker
 description: "allows multiple people to track a target"
 author: Technical27
+website: https://github.com/Technical27/tracker
 version: 0.1.0
 api-version: 1.16
 commands:
