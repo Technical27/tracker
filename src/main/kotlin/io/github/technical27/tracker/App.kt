@@ -100,28 +100,29 @@ class UpdateTask(val plugin: App, val trackedPlayer: Player) : BukkitRunnable() 
       val inv = player.inventory
       val stack = inv.contents.find { plugin.isCompass(it) }
 
-      if (stack == null) return
+      if (stack != null) {
+        val idx = inv.first(stack)
+        val meta = stack.itemMeta as CompassMeta
+        val playerDim = player.world.environment
 
-      val idx = inv.first(stack)
-      val meta = stack.itemMeta as CompassMeta
-      val playerDim = player.world.environment
+        if (playerDim != dim) {
+          val lastLoc = lastLocations.get(playerDim)
 
-      if (playerDim != dim) {
-        val lastLoc = lastLocations.get(playerDim)
-
-        if (lastLoc == null) {
-          return player.sendMessage("the tracked player never went to your dimension")
+          if (lastLoc == null) {
+            player.sendMessage("the tracked player never went to your dimension")
+          }
+          else {
+            meta.lodestone = lastLoc
+            stack.itemMeta = meta
+            inv.setItem(idx, stack)
+          }
         }
-
-        meta.lodestone = lastLoc
-        stack.itemMeta = meta
-        inv.setItem(idx, stack)
-      }
-      else {
-        meta.lodestone = loc
-        stack.itemMeta = meta
-        // FIXME: figure out a better way to update inventory, maybe player.updateInventory()?
-        inv.setItem(idx, stack)
+        else {
+          meta.lodestone = loc
+          stack.itemMeta = meta
+          // FIXME: figure out a better way to update inventory, maybe player.updateInventory()?
+          inv.setItem(idx, stack)
+        }
       }
     }
   }
@@ -129,25 +130,23 @@ class UpdateTask(val plugin: App, val trackedPlayer: Player) : BukkitRunnable() 
 
 class TrackCommand(val plugin: App) : CommandExecutor {
   override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-    if (sender is Player && sender.hasPermission("tracker.setplayer")) {
-      if (args.size == 1) {
-        val target = plugin.server.getPlayer(args[0])
+    if (args.size == 1) {
+      val target = plugin.server.getPlayer(args[0])
 
-        if (target == null) {
-          sender.sendMessage("that player doesn't exist or isn't online")
-          return false
-        }
-
-        if (plugin.task != null) {
-          plugin.task?.cancel()
-        }
-
-        plugin.task = UpdateTask(plugin, target)
-        // This shouldn't be null
-        plugin.task!!.runTaskTimer(plugin, 0L, 100L)
-        plugin.server.broadcastMessage("${target.displayName} is now the target")
-        return true
+      if (target == null) {
+        sender.sendMessage("that player doesn't exist or isn't online")
+        return false
       }
+
+      if (plugin.task != null) {
+        plugin.task?.cancel()
+      }
+
+      plugin.task = UpdateTask(plugin, target)
+      // This shouldn't be null
+      plugin.task!!.runTaskTimer(plugin, 0L, 100L)
+      plugin.server.broadcastMessage("${target.displayName} is now the target")
+      return true
     }
     return false
   }
@@ -155,7 +154,7 @@ class TrackCommand(val plugin: App) : CommandExecutor {
 
 class CompassCommand(val plugin: App) : CommandExecutor {
   override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-    if (sender is Player && sender.hasPermission("tracker.track")) {
+    if (sender is Player) {
       val compass = ItemStack(Material.COMPASS)
       compass.itemMeta = plugin.COMPASS_META
 
